@@ -12,5 +12,12 @@ def read_root():
     return {"message": "Hello from Wealth-pilot"}
 
 @app.get("/health")
-def read_root():
-    return {"Health": "this is healthy"}
+def read_health():
+    return {"status": "healthy",
+            "service":"wealth-pilot"
+            }
+
+# just a random write 
+@app.get("/home")
+def read_home():
+    return {"Home": "This should display the homepage"}
