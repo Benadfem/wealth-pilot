@@ -25,4 +25,4 @@ def get_transactions():
 # a method to add transaction data
 @app.post("/transactions")
 def create_transaction():
-    return {"id": "Transaction created sucessfully"}
+    return {"Message": "Transaction created sucessfully"}
