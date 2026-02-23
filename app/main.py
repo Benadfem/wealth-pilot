@@ -17,7 +17,12 @@ def read_health():
             "service":"wealth-pilot"
             }
 
-# just a random write 
-@app.get("/home")
-def read_home():
-    return {"Home": "This should display the homepage"}
+# a request for transaction
+@app.get("/transactions")
+def get_transactions():
+    return {"transactions" : []}
+
+# a method to add transaction data
+@app.post("/transactions")
+def create_transaction():
+    return {"id": "Transaction created sucessfully"}
