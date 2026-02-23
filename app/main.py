@@ -2,8 +2,18 @@
 # 'That's it. Nothing fancy. Just the absolute basics. 
 
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
+
+
+# let us create a class for the transaction that inherits form the BaseModel 
+class Transaction(BaseModel):
+    amount: float
+    description: str
+    date: str
+    category: str
+
 
 # to get request from the server, use the decorator as below 
 @app.get("/")
@@ -24,5 +34,5 @@ def get_transactions():
 
 # a method to add transaction data
 @app.post("/transactions")
-def create_transaction():
-    return {"Message": "Transaction created sucessfully"}
+def create_transaction(transaction: Transaction):
+    return transaction
