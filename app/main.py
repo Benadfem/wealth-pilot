@@ -9,8 +9,13 @@ app = FastAPI()
 
 
 # in-memory database 
-transactions_db =[]
-transaction_counter = 1
+# In-memory database with seeded data
+transactions_db = [
+    {"id": 1, "amount": 5000.00, "description": "Lunch at KFC", "date": "2026-02-24", "category": "food"},
+    {"id": 2, "amount": 15000.00, "description": "Uber ride to Island", "date": "2026-02-24", "category": "transport"},
+    {"id": 3, "amount": 250000.00, "description": "February salary", "date": "2026-02-24", "category": "income"},
+]
+transaction_counter = 4  # starts at 4 since 1,2,3 already exist
 
 # let us create model for the transaction that inherits form the BaseModel 
 class Transaction(BaseModel):
