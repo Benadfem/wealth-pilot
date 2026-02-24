@@ -7,7 +7,12 @@ from pydantic import BaseModel
 app = FastAPI()
 
 
-# let us create a class for the transaction that inherits form the BaseModel 
+
+# in-memory database 
+transactions_db =[]
+transaction_counter = 1
+
+# let us create model for the transaction that inherits form the BaseModel 
 class Transaction(BaseModel):
     amount: float
     description: str
@@ -27,12 +32,32 @@ def read_health():
             "service":"wealth-pilot"
             }
 
-# a request for transaction
+# returns all transactions 
 @app.get("/transactions")
 def get_transactions():
-    return {"transactions" : []}
+    return {"transactions": transactions_db}
+
+
+# a request for transaction individual transaction
+# pydantic see it as dynamic variables.by {}
+# return specific / one transaction 
+@app.get("/transactions/{transaction_id}")
+def get_transaction(transaction_id: int):
+    return {"transaction_id" : transaction_id}
 
 # a method to add transaction data
 @app.post("/transactions")
 def create_transaction(transaction: Transaction):
-    return transaction
+    global transaction_counter
+    new_transaction ={
+        "id": transaction_counter,
+        "amount": transaction.amount,
+        "description" : transaction.description,
+        "date": transaction.date,
+        "category": transaction.category
+    }
+    #update the transaction_db list 
+    transactions_db.append(new_transaction)
+    transaction_counter += 1
+
+    return new_transaction 
