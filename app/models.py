@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Float , String # pyright: ignore[reportMissingImports]
-from database import Base
+from app.database import Base
 
 class Transaction(Base):
     __tablename__ = "transactions"
