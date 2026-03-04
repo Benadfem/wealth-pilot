@@ -9,3 +9,11 @@ class Transaction(Base):
     description = Column(String)
     date = Column(String)
     category = Column(String)
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    password = Column(String)
