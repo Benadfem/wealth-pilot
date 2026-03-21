@@ -16,6 +16,9 @@ from app.models import User
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
+# conecting the agentic AI
+from app.agent import run_agent
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 models.Base.metadata.create_all(bind=engine)
@@ -42,11 +45,11 @@ class Transaction(BaseModel):
 # to get request from the server, use the decorator as below 
 @app.get("/")
 # declare the function to perform the get request 
-def read_root():
+async def read_root():
     return {"message": "Hello from Wealth-pilot"}
 
 @app.get("/health")
-def read_health():
+async def read_health():
     return {"status": "healthy",
             "service":"wealth-pilot"
             }
@@ -57,7 +60,7 @@ def read_health():
 # pydantic see it as dynamic variables.by {}
 # return specific / one transaction 
 @app.get("/transactions")
-def get_transactions(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+async def get_transactions(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     current_user = auth.verify_token(token, db)
     if not current_user:
         raise HTTPException(status_code=401, detail="Not authorized")
@@ -66,7 +69,7 @@ def get_transactions(db: Session = Depends(get_db), token: str = Depends(oauth2_
 
 # a method to add transaction data
 @app.post("/transactions")
-def create_transaction(transaction: Transaction, db: Session = Depends(get_db)):
+async def create_transaction(transaction: Transaction, db: Session = Depends(get_db)):
     db_transaction = models.Transaction(
         amount=transaction.amount,
         description=transaction.description,
@@ -81,7 +84,7 @@ def create_transaction(transaction: Transaction, db: Session = Depends(get_db)):
 
 # Register endpoint
 @app.post("/register")
-def register(user: UserCreate, db: Session = Depends(get_db)):
+async def register(user: UserCreate, db: Session = Depends(get_db)):
     if user.password != user.confirm_password:
         return {"error": "Passwords do not match"}
     existing_user = db.query(User).filter(User.username == user.username).first()
@@ -96,7 +99,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
 # Login endpoint
 @app.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == form_data.username).first()
     if not db_user:
         return {"error": "Invalid username or password"}
@@ -104,3 +107,16 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         return {"error": "Invalid username or password"}
     token = auth.create_access_token(data={"sub": db_user.username})
     return {"access_token": token, "token_type": "bearer"}
+
+
+# adding the agentic endpoint 
+@app.post("/agent")
+async def ask_agent(question: dict, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    current_user = auth.verify_token(token, db)
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authorized")
+    user_question = question.get("question")
+    if not user_question:
+        return {"error": "No question provided"}
+    answer = run_agent(user_question)
+    return {"answer": answer}
